@@ -21,7 +21,6 @@ module Tachymeter
         break if fastest_time_per_request < time_per_request
         fastest_time_per_request = time_per_request
         process_count += 1
-        puts "."
       end
       [process_count, fastest_time_per_request]
     end
