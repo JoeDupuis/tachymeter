@@ -4,44 +4,16 @@ require "benchmark"
 
 module Tachymeter
   class Run
-    include Debug
-
-    SUSTAINED_COUNT = 100
-    BURST_COUNT = 10
-
-    attr_reader :app, :env
-
-    def initialize env
-      @env = env
-    end
-
-    def start
-      results = {}
-      runs.each do |name, request_count|
-        results[name] = run(request_count, env)
-      end
-      results
-    end
-
-    private
-
-    def runs
-      {
-        sustained: SUSTAINED_COUNT,
-        burst: BURST_COUNT,
-      }
-    end
-
-    def run(n = 100, env)
-      @app = Rails.application
+    def start(n = 300)
       process_count = 1
 
       fastest_time_per_request = 99999999999
+      yield #pre heat
       while true
         results = Benchmark.measure do
           run_in_process(process_count) do
             n.times do
-              @response = app.call(env)
+              yield
             end
           end
         end
