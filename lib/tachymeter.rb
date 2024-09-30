@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "tachymeter/version"
+require_relative "tachymeter/debug"
 require "dummy/config/environment"
 
 module Tachymeter
