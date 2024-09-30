@@ -6,3 +6,9 @@
 /pkg/
 /spec/reports/
 /tmp/
+
+/lib/dummy/log/
+/lib/dummy/tmp/
+/lib/dummy/storage/
+/lib/dummy/public/assets
+/lib/dummy/db/*.sqlite3
