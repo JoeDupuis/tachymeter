@@ -4,33 +4,25 @@ require "benchmark"
 
 module Tachymeter
   class Run
-    def start(n = 300)
       process_count = 1
+    def start(n = 300, &block)
 
-      fastest_time_per_request = 99999999999
-      yield #pre heat
+      average_frequency = 0
+      yield #preheat
       while true
         results = Benchmark.measure do
-          run_in_process(process_count) do
-            n.times do
-              yield
-            end
-          end
+          run_in_process(process_count) { n.times(&block) }
         end
-        time_per_request = results.real / (n * process_count)
-        break if fastest_time_per_request < time_per_request
-        fastest_time_per_request = time_per_request
+        new_frequency =  n * process_count / results.real
+        break unless  average_frequency < new_frequency
+        average_frequency = new_frequency
         process_count += 1
       end
-      [process_count, fastest_time_per_request]
+      [process_count, average_frequency * process_count]
     end
 
-    def run_in_process process_count = 1
-      process_count.times do
-        fork do
-          yield
-        end
-      end
+    def run_in_process(process_count = 1, &block)
+      process_count.times { fork(&block) }
       Process.waitall
     end
   end
