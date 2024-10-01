@@ -18,7 +18,13 @@ module Tachymeter
         average_frequency = new_frequency
         process_count += 1
       end
+      reset_db
       [process_count, average_frequency * process_count]
+    end
+
+    def reset_db
+      ActiveRecord::Tasks::DatabaseTasks.load_schema_current(ActiveRecord.schema_format, ENV["SCHEMA"])
+      ActiveRecord::Tasks::DatabaseTasks.load_seed
     end
 
     def run_in_process(process_count = 1, &block)
