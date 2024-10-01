@@ -4,8 +4,8 @@ require "benchmark"
 
 module Tachymeter
   class Run
-      process_count = 1
     def start(n = 300, &block)
+      process_count = 1
 
       average_frequency = 0
       yield #preheat
