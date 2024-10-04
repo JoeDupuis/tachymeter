@@ -35,6 +35,11 @@ module Tachymeter
       fork_output[:time]
     end
 
+    def wait
+      fork_output
+      self
+    end
+
     private
 
     def fork_output

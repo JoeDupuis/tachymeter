@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 require_relative "fork"
+require "etc"
 
 module Tachymeter
   class Runner
-    def initialize(timeout: 3)
+    CPU_COUNT = Etc.nprocessors
+    def initialize(timeout: 1)
       @timeout = timeout
     end
 
@@ -12,22 +14,20 @@ module Tachymeter
       GC.disable
       create_db
       reset_db
-      process_count = 1
       average_frequency = 0
       yield #preheat
-      while true
+      @runs = Array.new(CPU_COUNT, [])
+      (1..CPU_COUNT).each do |process_count|
         new_average_frequency =  run_in_process(process_count, &block)
-        percentage = (new_average_frequency - average_frequency) / new_average_frequency * 100
-
-        break if percentage < -20
+        percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
+        break if percentage_diff < -50
         average_frequency = new_average_frequency if average_frequency < new_average_frequency
-
-        process_count += 1
+        @runs[process_count] << {process_count:, average_frequency:}
         reset_db
+        putc '.'
       end
-      process_count -= 1
       GC.enable
-      [process_count, average_frequency * process_count]
+      @runs
     end
 
     private
@@ -47,7 +47,7 @@ module Tachymeter
       forks = process_count.times
         .map { Fork.new(timeout:, &block) }
       sleep 1 #wait for all forks to be ready
-      forks.each(&:start)
+      forks.each(&:start).each(&:wait)
       forks.sum {|fork| fork.request_count / fork.time} / process_count
     ensure
       Process.waitall
