@@ -8,3 +8,9 @@ require "dummy/config/environment"
 module Tachymeter
   class Error < StandardError; end
 end
+
+module ActiveRecord::Tasks::DatabaseTasks
+  def verbose?
+    ENV["VERBOSE"] == "true"
+  end
+end
