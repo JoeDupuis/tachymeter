@@ -4,6 +4,8 @@ require "bundler/gem_tasks"
 require "minitest/test_task"
 require "tachymeter"
 
-Minitest::TestTask.create
+Minitest::TestTask.create do |t|
+  t.warning = false
+end
 
 task default: %i[test]
