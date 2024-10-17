@@ -5,9 +5,14 @@ require "etc"
 
 module Tachymeter
   class Runner
+    class Results < Struct.new(:process_count, :average_frequency, :run_id); end
+
     CPU_COUNT = Etc.nprocessors
-    def initialize(timeout: 1)
+    def initialize(timeout: 1, dropoff: 50, full_run: false)
       @timeout = timeout
+      @dropoff = dropoff
+      @full_run = full_run
+      @run_id = SecureRandom.uuid
     end
 
     def start(&block)
@@ -16,13 +21,13 @@ module Tachymeter
       reset_db
       average_frequency = 0
       yield #preheat
-      @runs = Array.new(CPU_COUNT, [])
+      @runs = []
       (1..CPU_COUNT).each do |process_count|
         new_average_frequency =  run_in_process(process_count, &block)
         percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
-        break if percentage_diff < -50
+        break if !full_run && percentage_diff < -dropoff
         average_frequency = new_average_frequency if average_frequency < new_average_frequency
-        @runs[process_count] << {process_count:, average_frequency:}
+        @runs << Results.new(process_count:, average_frequency: new_average_frequency, run_id:)
         reset_db
         putc '.'
       end
@@ -32,7 +37,7 @@ module Tachymeter
 
     private
 
-    attr_reader :timeout
+    attr_reader :timeout, :dropoff, :full_run, :run_id
 
     def create_db
       ActiveRecord::Tasks::DatabaseTasks.create_all
@@ -46,7 +51,7 @@ module Tachymeter
     def run_in_process(process_count = 1, &block)
       forks = process_count.times
         .map { Fork.new(timeout:, &block) }
-      sleep 1 #wait for all forks to be ready
+      sleep 0.5 #wait for all forks to be ready
       forks.each(&:start).each(&:wait)
       forks.sum {|fork| fork.request_count / fork.time} / process_count
     ensure
