@@ -22,18 +22,18 @@ module Tachymeter
       reset_db
       average_frequency = 0
       yield #preheat
-      @runs = []
+      @results = []
       runs.each do |process_count|
         new_average_frequency =  run_in_process(process_count, &block)
         percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
         break if !full_run && percentage_diff < -dropoff
         average_frequency = new_average_frequency if average_frequency < new_average_frequency
-        @runs << Results.new(process_count:, average_frequency: new_average_frequency, run_id:)
+        @results << Results.new(process_count:, average_frequency: new_average_frequency, run_id:)
         reset_db
         putc '.'
       end
       GC.enable
-      @runs
+      @results
     end
 
     private
