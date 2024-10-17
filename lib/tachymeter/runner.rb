@@ -8,11 +8,12 @@ module Tachymeter
     class Results < Struct.new(:process_count, :average_frequency, :run_id); end
 
     CPU_COUNT = Etc.nprocessors
-    def initialize(timeout: 1, dropoff: 50, full_run: false)
+    def initialize(timeout: 1, dropoff: 50, full_run: false, run_size: (1..CPU_COUNT))
       @timeout = timeout
       @dropoff = dropoff
       @full_run = full_run
       @run_id = SecureRandom.uuid
+      @run_size = Array(run_size)
     end
 
     def start(&block)
@@ -22,7 +23,7 @@ module Tachymeter
       average_frequency = 0
       yield #preheat
       @runs = []
-      (1..CPU_COUNT).each do |process_count|
+      run_size.each do |process_count|
         new_average_frequency =  run_in_process(process_count, &block)
         percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
         break if !full_run && percentage_diff < -dropoff
@@ -37,7 +38,7 @@ module Tachymeter
 
     private
 
-    attr_reader :timeout, :dropoff, :full_run, :run_id
+    attr_reader :timeout, :dropoff, :full_run, :run_id, :run_size
 
     def create_db
       ActiveRecord::Tasks::DatabaseTasks.create_all
