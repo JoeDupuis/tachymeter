@@ -3,5 +3,6 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   def index
+    Pet.find_by_name(Pet.pluck(:name).sample).then {_1.update!(name: _1.name + " !") }
   end
 end
