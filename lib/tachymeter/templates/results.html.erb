@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tachymeter Throughput Curve</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; }
+    canvas { max-width: 960px; margin-bottom: 3rem; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Throughput vs. Processes</h1>
+  <h2>Avg RPS (per process)</h2>
+  <canvas id="avgCurve" width="960" height="480"></canvas>
+
+  <h2>Total RPS (all processes)</h2>
+  <canvas id="totalCurve" width="960" height="480"></canvas>
+
+  <script>
+   const labels  = <%= labels.to_json  %>;
+   const dataAvg = <%= rps_avg.to_json %>;
+   const dataSum = <%= rps_sum.to_json %>;
+
+   new Chart(document.getElementById('avgCurve'), {
+       type: 'line',
+       data: {
+           labels: labels,
+           datasets: [
+               {
+                   label: 'Avg RPS (per process)',
+                   data:  dataAvg,
+                   tension: 0.2,
+                   pointRadius: 4,
+                   fill: false
+               }
+           ]
+       },
+       options: {
+           plugins: { title: { display: true, text: 'Avg RPS vs. Processes' } },
+           scales: {
+               x: { title: { display: true, text: 'Processes' }, ticks: { precision: 0 } },
+               y: { title: { display: true, text: 'Requests/sec' }, beginAtZero: true }
+           }
+       }
+   });
+
+   new Chart(document.getElementById('totalCurve'), {
+       type: 'line',
+       data: {
+           labels: labels,
+           datasets: [
+               {
+                   label: 'Total RPS (all processes)',
+                   data:  dataSum,
+                   tension: 0.2,
+                   pointRadius: 4,
+                   borderDash: [6,3],
+                   fill: false
+               }
+           ]
+       },
+       options: {
+           plugins: { title: { display: true, text: 'Total RPS vs. Processes' } },
+           scales: {
+               x: { title: { display: true, text: 'Processes' }, ticks: { precision: 0 } },
+               y: { title: { display: true, text: 'Requests/sec' }, beginAtZero: true }
+           }
+       }
+   });
+  </script>
+</body>
+</html>
