@@ -3,6 +3,7 @@
 require_relative "tachymeter/version"
 require_relative "tachymeter/debug"
 require_relative "tachymeter/runner"
+require_relative "tachymeter/scenario"
 require_relative "tachymeter/application"
 
 module Tachymeter
