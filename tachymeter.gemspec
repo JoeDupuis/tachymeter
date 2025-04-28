@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir['lib/**/*.rb', 'Rakefile', 'README.md', 'CHANGELOG.md', 'LICENSE.txt']
   spec.bindir = "exe"
-  spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  spec.executables = ["tachymeter"]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "rails"
