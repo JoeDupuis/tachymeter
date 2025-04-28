@@ -3,7 +3,7 @@
 require_relative "tachymeter/version"
 require_relative "tachymeter/debug"
 require_relative "tachymeter/runner"
-require "dummy/config/environment"
+require_relative "tachymeter/application"
 
 module Tachymeter
   class Error < StandardError; end
