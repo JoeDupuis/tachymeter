@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 require_relative "fork"
+require_relative "result_set"
 require "etc"
 
 module Tachymeter
   class Runner
-    class Results < Struct.new(:process_count, :average_frequency, :run_id); end
-
     CPU_COUNT = Etc.nprocessors
     def initialize(timeout: 1, dropoff: 50, full_run: false, runs: (1..CPU_COUNT))
       @timeout = timeout
@@ -28,7 +27,7 @@ module Tachymeter
         percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
         break if !full_run && percentage_diff < -dropoff
         average_frequency = new_average_frequency if average_frequency < new_average_frequency
-        @results << Results.new(process_count:, average_frequency: new_average_frequency, run_id:)
+        @results << ResultSet.new(process_count:, average_frequency: new_average_frequency, run_id:)
         reset_db
         putc '.'
       end
@@ -52,7 +51,7 @@ module Tachymeter
     def run_in_process(process_count = 1, &block)
       forks = process_count.times
         .map { Fork.new(timeout:, &block) }
-      sleep 0.5 #wait for all forks to be ready
+      sleep 1 #wait for all forks to be ready
       forks.each(&:start).each(&:wait)
       forks.sum {|fork| fork.request_count / fork.time} / process_count
     ensure
