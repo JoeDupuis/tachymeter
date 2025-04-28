@@ -13,6 +13,7 @@ with pkgs; {
     openssl
     postgresql_17
     mariadb_114
+    libmysqlclient
 
     cargo
     rustc

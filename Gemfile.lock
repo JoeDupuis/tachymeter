@@ -127,6 +127,7 @@ GEM
     marcel (1.0.4)
     mini_mime (1.1.5)
     minitest (5.25.5)
+    mysql2 (0.5.6)
     net-imap (0.5.6)
       date
       net-protocol
@@ -242,6 +243,7 @@ GEM
     stringio (3.1.5)
     thor (1.3.2)
     timeout (0.4.3)
+    trilogy (2.9.0)
     turbo-rails (2.0.10)
       actionpack (>= 6.0.0)
       railties (>= 6.0.0)
@@ -271,6 +273,7 @@ DEPENDENCIES
   jbuilder
   launchy
   minitest
+  mysql2 (~> 0.5)
   pg (~> 1.1)
   propshaft
   puma (>= 5.0)
@@ -280,6 +283,7 @@ DEPENDENCIES
   sqlite3 (>= 2.1)
   stimulus-rails
   tachymeter!
+  trilogy (>= 2.7.0)
   turbo-rails
   tzinfo-data
   web-console
