@@ -14,8 +14,12 @@ module Tachymeter
       rps_avg  = runs.map(&:average_frequency)
       rps_sum  = runs.map(&:total_frequency)
 
-      tpl  = ERB.new(File.read(template), trim_mode: "-")
-      html = tpl.result_with_hash(labels: labels, rps_avg: rps_avg, rps_sum: rps_sum)
+      html = ERB.new(File.read(template), trim_mode: "-")
+        .result_with_hash(
+          labels: labels,
+          rps_avg: rps_avg,
+          rps_sum: rps_sum
+        )
 
       Pathname(out_path).write(html)
     end
