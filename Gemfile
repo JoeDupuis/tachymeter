@@ -6,8 +6,6 @@ gemspec
 
 gem "rake"
 
-gem "minitest"
-
 gem "rubocop-rails-omakase"
 
 gem "debug"
