@@ -36,3 +36,5 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 group :development do
   gem "web-console"
 end
+
+gem "m"
