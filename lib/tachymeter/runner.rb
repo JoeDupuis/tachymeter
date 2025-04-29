@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "fork"
-require_relative "result_set"
+require_relative "result"
 require "etc"
 
 module Tachymeter
@@ -27,7 +27,7 @@ module Tachymeter
         percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
         break if !full_run && percentage_diff < -dropoff
         average_frequency = new_average_frequency if average_frequency < new_average_frequency
-        @results << ResultSet.new(process_count:, average_frequency: new_average_frequency, run_id:)
+        @results << Result.new(process_count:, average_frequency: new_average_frequency, run_id:)
         reset_db
         putc '.'
       end

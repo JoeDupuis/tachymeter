@@ -11,7 +11,7 @@ module FixtureHelper
 
     if File.exist?(fixture_file) && !ENV["REGEN_FIXTURE"]
       return JSON.parse(File.read(fixture_file), symbolize_names: true)
-                 .map { |h| Tachymeter::ResultSet.from_h(h) }
+                 .map { |h| Tachymeter::Result.from_h(h) }
     end
 
     data = if block_given?
