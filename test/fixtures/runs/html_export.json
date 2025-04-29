@@ -1,0 +1,17 @@
+[
+  {
+    "process_count": 1,
+    "average_frequency": 60.57741197406889,
+    "run_id": "877473b5-cea1-4f79-a034-35870a879486"
+  },
+  {
+    "process_count": 2,
+    "average_frequency": 53.31320281494089,
+    "run_id": "877473b5-cea1-4f79-a034-35870a879486"
+  },
+  {
+    "process_count": 3,
+    "average_frequency": 46.64983966569887,
+    "run_id": "877473b5-cea1-4f79-a034-35870a879486"
+  }
+]
