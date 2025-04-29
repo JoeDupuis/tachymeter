@@ -6,6 +6,8 @@ require_relative "tachymeter/runner"
 require_relative "tachymeter/scenario"
 require_relative "tachymeter/application"
 require_relative "tachymeter/html_export"
+require_relative "tachymeter/cli"
+require "tachymeter/score"
 
 module Tachymeter
   class Error < StandardError; end
