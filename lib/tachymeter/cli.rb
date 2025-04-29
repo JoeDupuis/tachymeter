@@ -6,7 +6,6 @@ module Tachymeter
   class CLI
     def initialize
       @scenario = Tachymeter::Scenario.new
-      Tachymeter::Application.new
     end
 
     def run
