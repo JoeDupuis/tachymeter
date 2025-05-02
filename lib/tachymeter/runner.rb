@@ -20,16 +20,20 @@ module Tachymeter
       create_db
       reset_db
       average_frequency = 0
-      yield #preheat
+      yield # preheat
       @results = []
       runs.each do |process_count|
-        new_average_frequency =  run_in_process(process_count, &block)
-        percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
-        break if !full_run && percentage_diff < -dropoff
+        new_average_frequency = run_in_process(process_count, &block)
+
+        if new_average_frequency > 0.001
+          percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
+          break if !full_run && percentage_diff < -dropoff
+        end
+
         average_frequency = new_average_frequency if average_frequency < new_average_frequency
         @results << Result.new(process_count:, average_frequency: new_average_frequency, run_id:)
         reset_db
-        putc '.'
+        putc "."
       end
       GC.enable
       @results
@@ -51,9 +55,14 @@ module Tachymeter
     def run_in_process(process_count = 1, &block)
       forks = process_count.times
         .map { Fork.new(timeout:, &block) }
-      sleep 1 #wait for all forks to be ready
+      sleep 1 # wait for all forks to be ready
       forks.each(&:start).each(&:wait)
-      forks.sum {|fork| fork.request_count / fork.time} / process_count
+
+      total_frequency = forks.sum do |fork|
+        fork.time > 0 ? fork.request_count / fork.time : 0
+      end
+
+      process_count > 0 ? total_frequency / process_count : 0
     ensure
       Process.waitall
     end

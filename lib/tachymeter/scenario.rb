@@ -3,7 +3,7 @@
 module Tachymeter
   class Scenario
     def initialize
-      @env = Rack::MockRequest.env_for("/", {"HTTP_HOST" => "localhost"})
+      @env = Rack::MockRequest.env_for("/", { "HTTP_HOST" => "localhost" })
       @app = Rails.application
     end
 

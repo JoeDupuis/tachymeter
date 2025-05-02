@@ -23,7 +23,7 @@ module Tachymeter
       ActiveRecord::Base.connection_handler.clear_all_connections!
 
       db_configs = ActiveRecord::DatabaseConfigurations.new({
-        "production" => {"primary" => {"url" => db_url}}
+        "production" => { "primary" => { "url" => db_url } }
       })
       ActiveRecord::Base.configurations = db_configs
 

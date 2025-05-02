@@ -37,7 +37,7 @@ module Tachymeter
 
       score_obj = Tachymeter::Score.new(results)
       puts "Score: #{score_obj.score.round}"
-      puts "Max throughput: %.1f req/s @ %d processes" % [max_rps, max_set.process_count]
+      puts "Max throughput: %.1f req/s @ %d processes" % [ max_rps, max_set.process_count ]
       puts "Max RPS / process: %.1f" % max_avg
       puts "Mean RPS / process across curve: %.1f" % mean_avg
 

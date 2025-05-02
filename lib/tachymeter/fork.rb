@@ -16,7 +16,7 @@ module Tachymeter
           break if ((end_time = Time.now) - start_time) > timeout
         end
 
-        Marshal.dump({request_count: i, time: end_time - start_time}, write)
+        Marshal.dump({ request_count: i, time: end_time - start_time }, write)
         write.close
         exit 0
       end

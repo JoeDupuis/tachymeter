@@ -5,8 +5,8 @@ require_relative "lib/tachymeter/version"
 Gem::Specification.new do |spec|
   spec.name = "tachymeter"
   spec.version = Tachymeter::VERSION
-  spec.authors = ["Joé Dupuis"]
-  spec.email = ["joe@dupuis.io"]
+  spec.authors = [ "Joé Dupuis" ]
+  spec.email = [ "joe@dupuis.io" ]
 
   spec.summary = "Rails benchmarking tool."
   spec.homepage = "https://github.com/JoeDupuis/tachymeter"
@@ -20,8 +20,8 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir['lib/**/*.rb', 'Rakefile', 'README.md', 'CHANGELOG.md', 'LICENSE.txt']
   spec.bindir = "exe"
-  spec.executables = ["tachymeter"]
-  spec.require_paths = ["lib"]
+  spec.executables = [ "tachymeter" ]
+  spec.require_paths = [ "lib" ]
 
   spec.add_dependency "rails"
 end

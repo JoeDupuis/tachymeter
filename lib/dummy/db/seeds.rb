@@ -8,7 +8,7 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-%w(Abel
+%w[Abel
 Bits
 Bitsy
 Bizzy
@@ -140,4 +140,4 @@ Yogi-bear
 Yukon
 Zack
 Zeke
-Zeus).each {|name| Pet.create!(name:) }
+Zeus].each { |name| Pet.create!(name:) }

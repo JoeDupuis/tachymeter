@@ -51,7 +51,7 @@ class CliTest < TestCase
       .with(runs, @output_path)
       .returns(@output_path)
 
-    stdout, = capture_io { Tachymeter::CLI.new(["-e", @output_path]).run }
+    stdout, = capture_io { Tachymeter::CLI.new([ "-e", @output_path ]).run }
 
     assert_match(/Results exported to HTML:/, stdout)
   end
@@ -73,7 +73,7 @@ class CliTest < TestCase
       .with(runs, default_path)
       .returns(default_path)
 
-    stdout, = capture_io { Tachymeter::CLI.new(["--export"]).run }
+    stdout, = capture_io { Tachymeter::CLI.new([ "--export" ]).run }
 
     assert_match(/Results exported to HTML:/, stdout)
   end
@@ -94,7 +94,7 @@ class CliTest < TestCase
       .with(runs, @json_path)
       .returns(@json_path)
 
-    stdout, = capture_io { Tachymeter::CLI.new(["--export", @json_path, "--format", "json"]).run }
+    stdout, = capture_io { Tachymeter::CLI.new([ "--export", @json_path, "--format", "json" ]).run }
 
     assert_match(/Results exported to JSON:/, stdout)
   end
