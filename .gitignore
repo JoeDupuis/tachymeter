@@ -23,3 +23,5 @@ devenv.local.nix
 .pre-commit-config.yaml
 
 **/.claude/settings.local.json
+
+**/CLAUDE.local.md
