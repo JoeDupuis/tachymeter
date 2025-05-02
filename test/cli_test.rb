@@ -8,10 +8,12 @@ require "securerandom"
 class CliTest < TestCase
   def setup
     @output_path = File.join(Dir.tmpdir, "tachymeter_cli_test_#{SecureRandom.hex(8)}.html")
+    @json_path = File.join(Dir.tmpdir, "tachymeter_cli_test_#{SecureRandom.hex(8)}.json")
   end
 
   def teardown
     File.delete(@output_path) if File.exist?(@output_path)
+    File.delete(@json_path) if File.exist?(@json_path)
   end
 
   def test_cli_prints_score_and_stats
@@ -76,3 +78,24 @@ class CliTest < TestCase
     assert_match(/Results exported to HTML:/, stdout)
   end
 
+  def test_cli_exports_with_format_option
+    runs = runs("sample")
+
+    Tachymeter::Runner
+      .expects(:new)
+      .returns(stub(start: runs))
+
+    Tachymeter::Scenario
+      .stubs(:new)
+      .returns(stub(run: nil))
+
+    Tachymeter::JsonExport
+      .expects(:write)
+      .with(runs, @json_path)
+      .returns(@json_path)
+
+    stdout, = capture_io { Tachymeter::CLI.new(["--export", @json_path, "--format", "json"]).run }
+
+    assert_match(/Results exported to JSON:/, stdout)
+  end
+end
