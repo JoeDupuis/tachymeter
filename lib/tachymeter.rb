@@ -16,6 +16,7 @@ end
 
 module ActiveRecord::Tasks::DatabaseTasks
   def verbose?
+    return false if Rails.env.production? && !ActiveModel::Type::Boolean.new.cast(ENV["TACHYMETER_DEBUG"])
     ENV["VERBOSE"] == "true"
   end
 end

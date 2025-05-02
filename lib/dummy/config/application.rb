@@ -22,7 +22,9 @@ module Dummy
     config.paths["config/database"] = config.root.join("config/database.yml")
     config.paths["config/environment"] = config.root.join("config/environment.rb")
     config.paths["config/routes.rb"] = config.root.join("config/routes.rb")
-    config.paths["log"] = config.root.join("log/#{Rails.env}.log")
+    unless Rails.env.production? && !ActiveModel::Type::Boolean.new.cast(ENV["TACHYMETER_DEBUG"])
+      config.paths["log"] = config.root.join("log/#{Rails.env}.log")
+    end
 
     config.secret_key_base = "secret_key_base"
 
