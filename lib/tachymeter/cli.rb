@@ -40,6 +40,13 @@ module Tachymeter
       puts "Max throughput: %.1f req/s @ %d processes" % [max_rps, max_set.process_count]
       puts "Max RPS / process: %.1f" % max_avg
       puts "Mean RPS / process across curve: %.1f" % mean_avg
+
+      if @options[:export]
+        format = @options[:format] || "html"
+        exporter_class = "Tachymeter::#{format.capitalize}Export".constantize
+        output_path = exporter_class.write(results, @options[:export])
+        puts "Results exported to #{format.upcase}: #{output_path}"
+      end
     end
 
     private
@@ -58,6 +65,14 @@ module Tachymeter
 
         opts.on("-f", "--full", "Full run (ignore 50% drop‑off rule)") do
           @options[:full_run] = true
+        end
+
+        opts.on("-e", "--export [PATH]", "Export results to file (default: results.html)") do |path|
+          @options[:export] = path || Tachymeter::HtmlExport::DEFAULT_OUTPUT
+        end
+
+        opts.on("--format FORMAT", "Export format (default: html)") do |format|
+          @options[:format] = format.downcase
         end
 
         opts.on("-h", "--help", "Print this help") do

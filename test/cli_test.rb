@@ -2,18 +2,24 @@
 
 require "test_helper"
 require "mocha/minitest"
+require "tmpdir"
+require "securerandom"
 
 class CliTest < TestCase
+  def setup
+    @output_path = File.join(Dir.tmpdir, "tachymeter_cli_test_#{SecureRandom.hex(8)}.html")
+  end
+
+  def teardown
+    File.delete(@output_path) if File.exist?(@output_path)
+  end
+
   def test_cli_prints_score_and_stats
-    # Fake benchmark results (process_count, avg_rps, run_id)
-    mock_results = [
-      Tachymeter::Result.new(1, 100.0, "run1"),
-      Tachymeter::Result.new(2,  90.0, "run1")
-    ]
+    runs = runs("sample")
 
     Tachymeter::Runner
       .expects(:new)
-      .returns(stub(start: mock_results))
+      .returns(stub(start: runs))
 
     Tachymeter::Scenario
       .stubs(:new)
@@ -26,4 +32,47 @@ class CliTest < TestCase
     assert_match(/Max RPS \/ process:/, stdout)
     assert_match(/Mean RPS \/ process across curve:/, stdout)
   end
-end
+
+  def test_cli_exports_with_e_option_custom_path
+    runs = runs("sample")
+
+    Tachymeter::Runner
+      .expects(:new)
+      .returns(stub(start: runs))
+
+    Tachymeter::Scenario
+      .stubs(:new)
+      .returns(stub(run: nil))
+
+    Tachymeter::HtmlExport
+      .expects(:write)
+      .with(runs, @output_path)
+      .returns(@output_path)
+
+    stdout, = capture_io { Tachymeter::CLI.new(["-e", @output_path]).run }
+
+    assert_match(/Results exported to HTML:/, stdout)
+  end
+
+  def test_cli_exports_with_export_option_default_path
+    runs = runs("sample")
+    default_path = Tachymeter::HtmlExport::DEFAULT_OUTPUT
+
+    Tachymeter::Runner
+      .expects(:new)
+      .returns(stub(start: runs))
+
+    Tachymeter::Scenario
+      .stubs(:new)
+      .returns(stub(run: nil))
+
+    Tachymeter::HtmlExport
+      .expects(:write)
+      .with(runs, default_path)
+      .returns(default_path)
+
+    stdout, = capture_io { Tachymeter::CLI.new(["--export"]).run }
+
+    assert_match(/Results exported to HTML:/, stdout)
+  end
+

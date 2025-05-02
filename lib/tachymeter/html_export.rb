@@ -22,6 +22,7 @@ module Tachymeter
         )
 
       Pathname(out_path).write(html)
+      out_path
     end
   end
 end

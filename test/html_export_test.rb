@@ -16,14 +16,14 @@ class HtmlExportTest < TestCase
   end
 
   def test_generates_html_file
-    runs = runs("html_export")
+    runs = runs("sample")
 
     Tachymeter::HtmlExport.write(runs, @output_path)
     assert File.exist?(@output_path), "Expected HTML file at #{@output_path}"
   end
 
   def test_contains_canvas_elements
-    runs = runs("html_export")
+    runs = runs("sample")
 
     Tachymeter::HtmlExport.write(runs, @output_path)
     content = File.read(@output_path)
@@ -32,7 +32,7 @@ class HtmlExportTest < TestCase
   end
 
   def test_embeds_labels_and_data
-    runs = runs("html_export")
+    runs = runs("sample")
 
     Tachymeter::HtmlExport.write(runs, @output_path)
     content = File.read(@output_path)
