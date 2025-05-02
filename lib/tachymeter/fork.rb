@@ -37,6 +37,7 @@ module Tachymeter
 
     def wait
       fork_output
+      read.close
       self
     end
 
