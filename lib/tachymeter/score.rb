@@ -2,33 +2,42 @@
 
 module Tachymeter
   class Score
-    LOW_REF_AUC  = 7_000.0
-    HIGH_REF_AUC = 80_000.0
+    DEFAULT_SCALE_FACTOR = 1000.0
+    REFERENCE_MACHINES = { default: { throughput: 1000.0, weight: 1.0 } }
+    attr_reader :max_throughput, :results, :reference_machines, :scale_factor
 
     def initialize(results,
-                   low_ref:  LOW_REF_AUC,
-                   high_ref: HIGH_REF_AUC)
-      @results  = Array(results).sort_by(&:process_count)
-      @low_ref  = low_ref
-      @high_ref = high_ref
+                  reference_machines: REFERENCE_MACHINES,
+                  scale_factor: DEFAULT_SCALE_FACTOR)
+      @results = Array(results).sort_by(&:process_count)
+      @reference_machines = reference_machines
+      @scale_factor = scale_factor
     end
 
-    def area_under_curve
-      return 0.0 if @results.size < 2
-
-      @results.each_cons(2).sum do |a, b|
-        dx = b.process_count - a.process_count
-        (a.total_frequency + b.total_frequency) * dx / 2.0
+    def max_throughput
+      @max_throughput ||= begin
+        return 0.0 if @results.empty?
+        @results.map(&:total_frequency).max
       end
     end
 
     def score
-      auc = area_under_curve
-      return 1_000  if auc <= @low_ref
-      return 10_000 if auc >= @high_ref
+      return 0.0 if @results.empty?
 
-      span = @high_ref - @low_ref
-      1_000 + (auc - @low_ref) * 9_000.0 / span
+      return max_throughput * @scale_factor if @reference_machines.empty?
+
+      total_weight = @reference_machines.sum { |_, config| config[:weight] || 1.0 }
+
+      weighted_score = @reference_machines.sum do |_, config|
+        ref_throughput = config[:throughput]
+        ref_weight = config[:weight]
+
+        normalized_weight = ref_weight / total_weight
+
+        (max_throughput / ref_throughput) * normalized_weight
+      end
+
+      weighted_score * @scale_factor
     end
   end
 end
