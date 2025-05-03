@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Set environment variables
+ENV["RAILS_ENV"] = "development"
+ENV["DATABASE_URL"] ||= "sqlite3::memory:"
+ENV["VERBOSE"] = "true"
+ENV["TACHYMETER_DEBUG"] = "true"
+ENV["BUNDLE_GEMFILE"] = File.expand_path("../Gemfile", __dir__)
+
+require "fileutils"
+require "bundler/setup"
+require "tachymeter"
+
+# Setup database
+ActiveRecord::Tasks::DatabaseTasks.create_all
+ActiveRecord::Tasks::DatabaseTasks.load_schema_current(ActiveRecord.schema_format, ENV["SCHEMA"])
+ActiveRecord::Tasks::DatabaseTasks.load_seed
+
+# Prepare server options
+port = ENV.fetch("PORT", "3000")
+binding_ip = ENV.fetch("BINDING", "localhost")
+
+puts "Starting development server at http://#{binding_ip}:#{port}"
+puts "Press Ctrl-C to stop"
+
+# Start the Rails server
+exec "bundle", "exec", "rails", "server", "-p", port, "-b", binding_ip

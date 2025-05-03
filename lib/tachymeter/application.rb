@@ -4,8 +4,8 @@ module Tachymeter
   class Application
     attr_reader :rails_app
 
-    def initialize
-      ENV["RAILS_ENV"] = "production"
+    def initialize(env = ENV["RAILS_ENV"] || "production")
+      ENV["RAILS_ENV"] = env
       ENV["DATABASE_URL"] ||= "sqlite3::memory:"
 
       require "dummy/config/environment"
