@@ -6,22 +6,72 @@
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; }
     canvas { max-width: 960px; margin-bottom: 3rem; }
+    .score-section {
+      background: #f5f5f5;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #3498db;
+    }
+    .highlight {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #3498db;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f5f5f5;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <h1>Throughput vs. Processes</h1>
-  <h2>Avg RPS (per process)</h2>
-  <canvas id="avgCurve" width="960" height="480"></canvas>
-
-  <h2>Total RPS (all processes)</h2>
+  <h1>Tachymeter Results</h1>
+  <div class="score-section">
+    <h2>Performance Metrics</h2>
+    <p>Score: <span class="highlight"><%= sprintf("%.2f", score) %></span></p>
+    <p>Max Throughput: <span class="highlight"><%= sprintf("%.2f", max_throughput) %> req/sec</span></p>
+  </div>
+  <h2>Throughput vs. Processes</h2>
+  <h3>Total RPS (all processes)</h3>
   <canvas id="totalCurve" width="960" height="480"></canvas>
-
+  <h3>Avg RPS (per process)</h3>
+  <canvas id="avgCurve" width="960" height="480"></canvas>
+  <h2>Results Table</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Processes</th>
+        <th>Average Throughput (per process)</th>
+        <th>Total Throughput</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% runs.each do |run| %>
+        <tr>
+          <td><%= run.process_count %></td>
+          <td><%= sprintf("%.2f", run.average_frequency) %> req/sec</td>
+          <td><%= sprintf("%.2f", run.total_frequency) %> req/sec</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
   <script>
-   const labels  = <%= labels.to_json  %>;
+   const labels = <%= labels.to_json %>;
    const dataAvg = <%= rps_avg.to_json %>;
    const dataSum = <%= rps_sum.to_json %>;
-
    new Chart(document.getElementById('avgCurve'), {
        type: 'line',
        data: {
@@ -29,7 +79,7 @@
            datasets: [
                {
                    label: 'Avg RPS (per process)',
-                   data:  dataAvg,
+                   data: dataAvg,
                    tension: 0.2,
                    pointRadius: 4,
                    fill: false
@@ -44,7 +94,6 @@
            }
        }
    });
-
    new Chart(document.getElementById('totalCurve'), {
        type: 'line',
        data: {
@@ -52,7 +101,7 @@
            datasets: [
                {
                    label: 'Total RPS (all processes)',
-                   data:  dataSum,
+                   data: dataSum,
                    tension: 0.2,
                    pointRadius: 4,
                    borderDash: [6,3],

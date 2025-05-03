@@ -38,6 +38,18 @@ class HtmlExportTest < TestCase
     assert_includes content, '<canvas id="totalCurve"'
   end
 
+  def test_includes_results_table
+    runs = runs("sample")
+
+    Tachymeter::HtmlExport.write(runs, @output_path)
+    content = File.read(@output_path)
+
+    assert_includes content, "<table>"
+    assert_includes content, "<th>Processes</th>"
+    assert_includes content, "<th>Average Throughput (per process)</th>"
+    assert_includes content, "<th>Total Throughput</th>"
+  end
+
   def test_embeds_labels_and_data
     runs = runs("sample")
 
@@ -46,6 +58,22 @@ class HtmlExportTest < TestCase
     assert_includes content, runs.map(&:process_count).to_json
     assert_includes content, runs.map(&:average_frequency).to_json
     assert_includes content, runs.map(&:total_frequency).to_json
+  end
+
+  def test_includes_score_and_max_throughput
+    runs = runs("sample")
+    score_calculator = Tachymeter::Score.new(runs)
+    expected_score = score_calculator.score
+    expected_max_throughput = score_calculator.max_throughput
+
+    Tachymeter::HtmlExport.write(runs, @output_path)
+    content = File.read(@output_path)
+
+    assert_includes content, "<div class=\"score-section\""
+    assert_includes content, "Score: <span class=\"highlight\">"
+    assert_includes content, "Max Throughput: <span class=\"highlight\">"
+    assert_includes content, sprintf("%.2f", expected_score)
+    assert_includes content, sprintf("%.2f", expected_max_throughput)
   end
 
   def test_uses_default_output_path_when_none_provided
