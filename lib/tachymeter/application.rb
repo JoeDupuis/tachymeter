@@ -35,7 +35,11 @@ module Tachymeter
       ActiveRecord::Base.connection_handler.clear_all_connections!
 
       db_configs = ActiveRecord::DatabaseConfigurations.new({
-        "production" => { "primary" => { "url" => db_url } }
+        "production" => { "primary" => {
+          "url" => db_url,
+          "pool" => ENV.fetch("RAILS_MAX_THREADS") { 5 },
+          "timeout" => 5000
+        } }
       })
       ActiveRecord::Base.configurations = db_configs
 
