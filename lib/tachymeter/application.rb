@@ -37,7 +37,7 @@ module Tachymeter
     end
 
     def load_schema
-      ActiveRecord::Tasks::DatabaseTasks.load_schema_current(ActiveRecord.schema_format, ENV["SCHEMA"]) #load Rails.root.join("db/schema.rb")
+      ActiveRecord::Tasks::DatabaseTasks.load_schema_current(ActiveRecord.schema_format, ENV["SCHEMA"])
     end
 
     def seed
