@@ -1,63 +1,49 @@
 module Tachymeter
   class Fork
-    def initialize(timeout: 3)
-      @read, @write = IO.pipe
+    def initialize(&block)
+      @ctl_read,  @ctl_write  = IO.pipe
+      @read,      @write      = IO.pipe
 
       @pid = fork do
-        read.close
-        wait_for_usr1
-        start_time = Time.now
+        @ctl_write.close
+        @read.close
 
-        i = 0
-        end_time = nil
+        deadline = Marshal.load(@ctl_read)
+        start_time = get_time
+        end_time = start_time
+        iterations  = 0
         loop do
           yield
-          i += 1
-          break if ((end_time = Time.now) - start_time) > timeout
+          iterations += 1
+          end_time = get_time
+          break if end_time  >= deadline
         end
 
-        Marshal.dump({ request_count: i, time: end_time - start_time }, write)
-        write.close
+        run_time = end_time - start_time
+        Marshal.dump({ request_count: iterations, time: run_time, start_time:, end_time: }, @write)
         exit 0
       end
-      write.close
+
+      @ctl_read.close
+      @write.close
     end
 
-    def start
-      Process.kill("USR1", pid)
+    def get_time
+      Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
 
-    def request_count
-      fork_output[:request_count]
+    def start(deadline)
+      Marshal.dump(deadline, @ctl_write)
+      @ctl_write.close
     end
 
-    def time
-      fork_output[:time]
-    end
-
-    def wait
-      fork_output
-      read.close
-      self
-    end
+    def request_count = fork_output[:request_count]
+    def time          = fork_output[:time]
+    def wait          = fork_output.tap { @read.close; self }
 
     private
 
-    def fork_output
-      @fork_output ||= Marshal.load(read)
-    end
-
-    attr_reader :read, :write, :pid
-
-    def wait_for_usr1
-      thread = Thread.new do
-        current_thread = Thread.current
-        Signal.trap("USR1") do
-          current_thread.kill
-        end
-        sleep
-      end
-      thread.join
-    end
+    def fork_output   = @fork_output ||= Marshal.load(@read)
+    attr_reader :pid
   end
 end

@@ -53,16 +53,15 @@ module Tachymeter
     end
 
     def run_in_process(process_count = 1, &block)
-      forks = process_count.times
-        .map { Fork.new(timeout:, &block) }
-      sleep 1 # wait for all forks to be ready
-      forks.each(&:start).each(&:wait)
+      forks = process_count.times.map { Fork.new(&block) }
 
-      total_frequency = forks.sum do |fork|
-        fork.time > 0 ? fork.request_count / fork.time : 0
-      end
+      deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
 
-      process_count > 0 ? total_frequency / process_count : 0
+      forks.each { |f| f.start(deadline) }
+      forks.each(&:wait)
+
+      total_frequency = forks.sum { |f| f.time.positive? ? f.request_count / f.time : 0 }
+      process_count.positive? ? total_frequency / process_count : 0
     ensure
       Process.waitall
     end
