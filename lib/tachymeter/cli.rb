@@ -17,6 +17,8 @@ module Tachymeter
 
     # Entrypoint for the executable
     def run
+      temp_db_path = Tachymeter.application.setup_default_db
+
       @options[:runs] ||= (1..Etc.nprocessors).to_a
       scenario = Tachymeter::Scenario.new
       runner   = Tachymeter::Runner.new(
@@ -46,6 +48,10 @@ module Tachymeter
         exporter_class = "Tachymeter::#{format.capitalize}Export".constantize
         output_path = exporter_class.write(results, @options[:export])
         puts "Results exported to #{format.upcase}: #{output_path}"
+      end
+
+      if temp_db_path && File.exist?(temp_db_path)
+        File.delete(temp_db_path)
       end
     end
 

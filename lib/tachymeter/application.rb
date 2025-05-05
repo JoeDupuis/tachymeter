@@ -14,6 +14,20 @@ module Tachymeter
       @rails_app.initialize!
     end
 
+    def setup_default_db
+      return ENV["DATABASE_URL"] if ENV["DATABASE_URL"] && ENV["DATABASE_URL"] != "sqlite3::memory:"
+      require "securerandom"
+      require "tmpdir"
+
+      temp_dir = Dir.tmpdir
+      db_name = "tachymeter_#{SecureRandom.hex(6)}.db"
+      temp_db_path = File.join(temp_dir, db_name)
+
+      configure_database(url: "sqlite3:#{temp_db_path}")
+
+      temp_db_path
+    end
+
     def configure_database(url: nil, config_file: nil, config_hash: nil)
       db_url = determine_db_url(url, config_file, config_hash)
       return unless db_url

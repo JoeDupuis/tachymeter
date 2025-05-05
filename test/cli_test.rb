@@ -98,4 +98,11 @@ class CliTest < TestCase
 
     assert_match(/Results exported to JSON:/, stdout)
   end
+
+  def test_cli_with_real_execution
+    stdout, = capture_io { Tachymeter::CLI.new([ "-p", "1", "-t", "1" ]).run }
+
+    assert_match(/Score:\s+\d+/, stdout)
+    assert_match(/Max throughput:/, stdout)
+  end
 end
