@@ -67,5 +67,3 @@ module Tachymeter
     @application
   end
 end
-
-Rails.application

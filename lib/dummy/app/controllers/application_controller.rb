@@ -5,4 +5,9 @@ class ApplicationController < ActionController::Base
   def index
     Pet.find_by_name(Pet.pluck(:name).sample).then { _1.update!(name: _1.name + " !") }
   end
+
+  def test_error
+    # Dedicated action for testing error handling
+    raise StandardError, "This is a test error"
+  end
 end
