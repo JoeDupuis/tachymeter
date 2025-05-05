@@ -16,7 +16,6 @@ module Tachymeter
     end
 
     def start(&block)
-      GC.disable
       create_db
       reset_db
       average_frequency = 0
@@ -35,7 +34,7 @@ module Tachymeter
         reset_db
         putc "."
       end
-      GC.enable
+
       @results
     end
 
