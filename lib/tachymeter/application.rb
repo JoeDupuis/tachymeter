@@ -32,8 +32,16 @@ module Tachymeter
       db_url
     end
 
+    def create_db
+      ActiveRecord::Tasks::DatabaseTasks.create_all
+    end
+
     def load_schema
-      load Rails.root.join("db/schema.rb")
+      ActiveRecord::Tasks::DatabaseTasks.load_schema_current(ActiveRecord.schema_format, ENV["SCHEMA"]) #load Rails.root.join("db/schema.rb")
+    end
+
+    def seed
+      ActiveRecord::Tasks::DatabaseTasks.load_seed
     end
 
     private
