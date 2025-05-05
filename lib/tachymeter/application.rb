@@ -18,8 +18,6 @@ module Tachymeter
       db_url = determine_db_url(url, config_file, config_hash)
       return unless db_url
 
-      ENV["DATABASE_URL"] = db_url
-
       ActiveRecord::Base.connection_handler.clear_all_connections!
 
       db_configs = ActiveRecord::DatabaseConfigurations.new({
