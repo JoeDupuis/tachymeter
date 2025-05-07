@@ -21,4 +21,13 @@ with pkgs; {
 
   languages.ruby.enable = true;
   languages.ruby.versionFile = ./.ruby-version;
+
+  services.postgres = {
+    enable = true;
+    listen_addresses = "127.0.0.1";
+    port = 5432;
+    initialScript = ''
+      CREATE ROLE postgres WITH SUPERUSER LOGIN;
+    '';
+  };
 }
