@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+require "yaml"
+require "erb"
+require "securerandom"
+require "tmpdir"
+
+
 module Tachymeter
   class Application
     attr_reader :rails_app
@@ -16,20 +22,32 @@ module Tachymeter
 
     def setup_default_db
       return ENV["DATABASE_URL"] if ENV["DATABASE_URL"] && ENV["DATABASE_URL"] != "sqlite3::memory:"
-      require "securerandom"
-      require "tmpdir"
 
       temp_dir = Dir.tmpdir
       db_name = "tachymeter_#{SecureRandom.hex(6)}.db"
       temp_db_path = File.join(temp_dir, db_name)
 
-      configure_database(url: "sqlite3:#{temp_db_path}")
+      configure_database("sqlite3:#{temp_db_path}")
 
       temp_db_path
     end
 
-    def configure_database(url: nil, config_file: nil, config_hash: nil)
-      db_url = determine_db_url(url, config_file, config_hash)
+    def configure_database(config = nil)
+      db_config =
+        case config
+        when Hash
+          config
+        when String
+          if File.exist?(config)
+            parse_config_file(config)
+          else
+            { "url" => config }
+          end
+        else
+          return nil
+        end
+
+      db_url = determine_db_url(db_config)
       return unless db_url
 
       ActiveRecord::Base.connection_handler.clear_all_connections!
@@ -37,8 +55,8 @@ module Tachymeter
       db_configs = ActiveRecord::DatabaseConfigurations.new({
         "production" => { "primary" => {
           "url" => db_url,
-          "pool" => ENV.fetch("RAILS_MAX_THREADS") { 5 },
-          "timeout" => 5000
+          "pool" => db_config["pool"] || ENV.fetch("RAILS_MAX_THREADS") { 5 },
+          "timeout" => db_config["timeout"] || 5000
         } }
       })
       ActiveRecord::Base.configurations = db_configs
@@ -62,26 +80,30 @@ module Tachymeter
 
     private
 
-    def determine_db_url(url, config_file, config_hash)
-      return url if url
+    def determine_db_url(config)
+      return config["url"] if config["url"]
 
-      if config_hash
-        adapter = config_hash[:adapter] || "sqlite3"
-        database = config_hash[:database]
-        return "#{adapter}:#{database}" if database
-      end
+      if config["adapter"] && config["database"]
+        adapter = config["adapter"]
+        database = config["database"]
 
-      if config_file && File.exist?(config_file)
-        return parse_config_file(config_file)
+        if adapter == "postgresql" && config["host"]
+          port = config["port"] || 5432
+          return "#{adapter}://#{config["host"]}:#{port}/#{database}"
+        end
+
+        return "#{adapter}:#{database}"
       end
 
       ENV["DATABASE_URL"]
     end
 
     def parse_config_file(path)
-      require "yaml"
-      config = YAML.load_file(path)
-      config.dig("production", "url")
+      content = File.read(path)
+      yaml = ERB.new(content).result
+      config = YAML.load(yaml)
+
+      config["production"] || {}
     end
   end
 

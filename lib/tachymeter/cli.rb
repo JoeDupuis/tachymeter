@@ -17,7 +17,12 @@ module Tachymeter
 
     # Entrypoint for the executable
     def run
-      temp_db_path = Tachymeter.application.setup_default_db
+      if @options[:db_config]
+        Tachymeter.application.configure_database(@options[:db_config])
+        temp_db_path = nil
+      else
+        temp_db_path = Tachymeter.application.setup_default_db
+      end
 
       @options[:runs] ||= (1..Etc.nprocessors).to_a
       scenario = Tachymeter::Scenario.new
@@ -79,6 +84,10 @@ module Tachymeter
 
         opts.on("--format FORMAT", "Export format (default: html)") do |format|
           @options[:format] = format.downcase
+        end
+
+        opts.on("--db-config PATH", "Specify database config file (e.g. database.yml)") do |path|
+          @options[:db_config] = path
         end
 
         opts.on("-h", "--help", "Print this help") do

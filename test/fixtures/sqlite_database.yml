@@ -1,0 +1,5 @@
+production:
+  adapter: sqlite3
+  database: <%= File.join(Dir.tmpdir, "tachymeter_test_custom.db") %>
+  pool: 10
+  timeout: 10000
