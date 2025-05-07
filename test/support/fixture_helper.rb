@@ -20,12 +20,13 @@ module FixtureHelper
     Tachymeter.application.load_schema
     Tachymeter.application.seed
 
-    data = if block_given?
-             Tachymeter::Runner.new(**runner_opts).start(&block)
-           else
-             scenario = Tachymeter::Scenario.new
-             Tachymeter::Runner.new(**runner_opts).start { scenario.run }
-           end
+    data =
+      if block_given?
+        Tachymeter::Runner.new(**runner_opts).start(&block)
+      else
+        scenario = Tachymeter::Scenario.new
+        Tachymeter::Runner.new(**runner_opts).start { scenario.run }
+      end
 
     FileUtils.mkdir_p(fixture_dir)
     File.write(fixture_file, JSON.pretty_generate(data.map(&:to_h)))
