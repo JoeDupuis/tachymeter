@@ -87,9 +87,17 @@ module Tachymeter
         adapter = config["adapter"]
         database = config["database"]
 
-        if adapter == "postgresql" && config["host"]
-          port = config["port"] || 5432
-          return "#{adapter}://#{config["host"]}:#{port}/#{database}"
+        if (adapter == "postgresql" || adapter == "mysql2") && config["host"]
+          port = config["port"] || (adapter == "postgresql" ? 5432 : 3306)
+          username = config["username"] || ""
+          password = config["password"] || ""
+
+          if username.empty?
+            return "#{adapter}://#{config["host"]}:#{port}/#{database}"
+          else
+            credentials = password.empty? ? username : "#{username}:#{password}"
+            return "#{adapter}://#{credentials}@#{config["host"]}:#{port}/#{database}"
+          end
         end
 
         return "#{adapter}:#{database}"
