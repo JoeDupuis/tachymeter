@@ -30,4 +30,16 @@ with pkgs; {
       CREATE ROLE postgres WITH SUPERUSER LOGIN;
     '';
   };
+
+  services.mysql = {
+    enable = true;
+    ensureUsers = [
+      {
+        name = "root";
+        ensurePermissions = {
+          "*.*" = "ALL PRIVILEGES";
+        };
+      }
+    ];
+  };
 }
