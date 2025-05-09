@@ -19,7 +19,11 @@ module Tachymeter
     end
 
     def run
-      status, headers, body = call
+      call
+    end
+
+    def call
+      status, headers, body = app.call(env)
 
       if status >= 400
         message = "HTTP Error #{status}"
@@ -27,10 +31,6 @@ module Tachymeter
       end
 
       [ status, headers, body ]
-    end
-
-    def call
-      app.call(env)
     end
 
     private
