@@ -23,10 +23,6 @@ class CliTest < TestCase
       .expects(:new)
       .returns(stub(start: runs))
 
-    Tachymeter::Scenario
-      .stubs(:new)
-      .returns(stub(run: nil))
-
     stdout, = capture_io { Tachymeter::CLI.new([]).run }
 
     assert_match(/Score:\s+\d+/, stdout)
@@ -42,9 +38,6 @@ class CliTest < TestCase
       .expects(:new)
       .returns(stub(start: runs))
 
-    Tachymeter::Scenario
-      .stubs(:new)
-      .returns(stub(run: nil))
 
     Tachymeter::HtmlExport
       .expects(:write)
@@ -64,10 +57,6 @@ class CliTest < TestCase
       .expects(:new)
       .returns(stub(start: runs))
 
-    Tachymeter::Scenario
-      .stubs(:new)
-      .returns(stub(run: nil))
-
     Tachymeter::HtmlExport
       .expects(:write)
       .with(runs, default_path)
@@ -84,10 +73,6 @@ class CliTest < TestCase
     Tachymeter::Runner
       .expects(:new)
       .returns(stub(start: runs))
-
-    Tachymeter::Scenario
-      .stubs(:new)
-      .returns(stub(run: nil))
 
     Tachymeter::JsonExport
       .expects(:write)

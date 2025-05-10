@@ -11,8 +11,7 @@ class ScenarioTest < TestCase
   end
 
   def test_error_endpoint_raises_scenario_error
-    scenario = Tachymeter::Scenario.new
-    scenario.instance_variable_set(:@env, Rack::MockRequest.env_for("/test_error", { "HTTP_HOST" => "localhost" }))
+    scenario = Tachymeter::Scenarios::CrashScenario.new
 
     error = assert_raises(Tachymeter::ScenarioError) do
       reopen_stderr { scenario.run }
@@ -23,7 +22,7 @@ class ScenarioTest < TestCase
   end
 
   def test_normal_endpoint_succeeds
-    scenario = Tachymeter::Scenario.new
+    scenario = Tachymeter::Scenarios::HelloWorldScenario.new
 
     assert_nothing_raised do
       scenario.run

@@ -3,23 +3,28 @@
 require_relative "fork"
 require_relative "result"
 require "etc"
+require "securerandom"
 
 module Tachymeter
   class Runner
     CPU_COUNT = Etc.nprocessors
-    def initialize(timeout: 1, dropoff: 50, full_run: false, runs: (1..CPU_COUNT))
+
+    def initialize(timeout: 1, dropoff: 50, full_run: false, runs: (1..CPU_COUNT), init_forks: false)
       @timeout = timeout
       @dropoff = dropoff
       @full_run = full_run
       @run_id = SecureRandom.uuid
       @runs = Array(runs)
+      @init_forks = init_forks
     end
 
     def start(&block)
+      raise ArgumentError, "Block is required" unless block_given?
+
       create_db
       reset_db
       average_frequency = 0
-      yield # preheat
+      yield 0, 0 # preheat
       @results = []
       runs.each do |process_count|
         new_average_frequency = run_in_process(process_count, &block)
@@ -40,7 +45,7 @@ module Tachymeter
 
     private
 
-    attr_reader :timeout, :dropoff, :full_run, :run_id, :runs
+    attr_reader :timeout, :dropoff, :full_run, :run_id, :runs, :init_forks
 
     def create_db
       ActiveRecord::Tasks::DatabaseTasks.create_all
@@ -51,8 +56,10 @@ module Tachymeter
       ActiveRecord::Tasks::DatabaseTasks.load_seed
     end
 
-    def run_in_process(process_count = 1, &block)
-      forks = process_count.times.map { Fork.new(&block) }
+    def run_in_process(process_count, &block)
+      forks = process_count.times.map do |fork_index|
+        Fork.new(init_forks) { |iteration| yield(fork_index, iteration) }
+      end
 
       deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
 

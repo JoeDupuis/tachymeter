@@ -7,15 +7,14 @@ require "etc"
 module Tachymeter
   class CLI
     DEFAULT_TIMEOUT = 5
-    LOW_REF_RPS  = 700      # placeholder calibration numbers
-    HIGH_REF_RPS = 8_000    # placeholder calibration numbers
+    LOW_REF_RPS  = 700
+    HIGH_REF_RPS = 8_000
 
     def initialize(argv = ARGV)
       @options = { timeout: DEFAULT_TIMEOUT }
       parse_options!(argv)
     end
 
-    # Entrypoint for the executable
     def run
       if @options[:db_config]
         Tachymeter.application.configure_database(@options[:db_config])
@@ -25,13 +24,23 @@ module Tachymeter
       end
 
       @options[:runs] ||= (1..Etc.nprocessors).to_a
-      scenario = Tachymeter::Scenario.new
-      runner   = Tachymeter::Runner.new(
-        timeout:  @options[:timeout],
-        full_run: @options[:full_run],
-        runs:     @options[:runs]
+
+      orchestrator = ScenarioOrchestrator.new(
+        seed: @options[:seed]
       )
-      results = runner.start { scenario.run }
+
+      runner = Tachymeter::Runner.new(
+        timeout: @options[:timeout],
+        full_run: @options[:full_run],
+        runs: @options[:runs],
+        init_forks: true,
+      )
+
+      results = runner.start do |fork_index, iteration|
+        orchestrator.shuffle!(fork_index) and next if iteration == Fork::INIT_PHASE
+        orchestrator.run_scenario(iteration)
+      end
+
       if results.empty?
         warn "No benchmark results produced—nothing to score."
         exit(1)
@@ -76,6 +85,10 @@ module Tachymeter
 
         opts.on("-f", "--full", "Full run (ignore 50% drop‑off rule)") do
           @options[:full_run] = true
+        end
+
+        opts.on("-s", "--seed SEED", Integer, "Random seed for scenario order") do |seed|
+          @options[:seed] = seed
         end
 
         opts.on("-e", "--export [PATH]", "Export results to file (default: results.html)") do |path|

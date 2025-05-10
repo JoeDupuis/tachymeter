@@ -1,6 +1,8 @@
 module Tachymeter
   class Fork
-    def initialize(&block)
+    INIT_PHASE = -1
+
+    def initialize(require_initialization = false, &block)
       @ctl_read,  @ctl_write  = IO.pipe
       @read,      @write      = IO.pipe
 
@@ -8,15 +10,17 @@ module Tachymeter
         @ctl_write.close
         @read.close
 
+        yield INIT_PHASE if require_initialization
+
         deadline = Marshal.load(@ctl_read)
         start_time = get_time
         end_time = start_time
         iterations  = 0
         loop do
-          yield
+          yield iterations
           iterations += 1
           end_time = get_time
-          break if end_time  >= deadline
+          break if end_time >= deadline
         end
 
         run_time = end_time - start_time
