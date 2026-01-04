@@ -23,8 +23,6 @@ module Tachymeter
         temp_db_path = Tachymeter.application.setup_default_db
       end
 
-      @options[:runs] ||= (1..Etc.nprocessors).to_a
-
       orchestrator = ScenarioOrchestrator.new(
         seed: @options[:seed]
       )
@@ -83,7 +81,7 @@ module Tachymeter
           @options[:runs] = list.map(&:to_i)
         end
 
-        opts.on("-f", "--full", "Full run (ignore 50% drop‑off rule)") do
+        opts.on("-f", "--full", "Full run (test all process counts 1..N)") do
           @options[:full_run] = true
         end
 

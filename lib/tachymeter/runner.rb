@@ -9,12 +9,11 @@ module Tachymeter
   class Runner
     CPU_COUNT = Etc.nprocessors
 
-    def initialize(timeout: 1, dropoff: 50, full_run: false, runs: (1..CPU_COUNT), init_forks: false)
+    def initialize(timeout: 1, full_run: false, runs: nil, init_forks: false)
       @timeout = timeout
-      @dropoff = dropoff
       @full_run = full_run
       @run_id = SecureRandom.uuid
-      @runs = Array(runs)
+      @runs = Array(runs || (full_run ? (1..CPU_COUNT) : [ CPU_COUNT ]))
       @init_forks = init_forks
     end
 
@@ -23,19 +22,11 @@ module Tachymeter
 
       create_db
       reset_db
-      average_frequency = 0
       yield 0, 0 # preheat
       @results = []
       runs.each do |process_count|
-        new_average_frequency = run_in_process(process_count, &block)
-
-        if new_average_frequency > 0.001
-          percentage_diff = (new_average_frequency - average_frequency) / new_average_frequency * 100
-          break if !full_run && percentage_diff < -dropoff
-        end
-
-        average_frequency = new_average_frequency if average_frequency < new_average_frequency
-        @results << Result.new(process_count:, average_frequency: new_average_frequency, run_id:)
+        average_frequency = run_in_process(process_count, &block)
+        @results << Result.new(process_count:, average_frequency:, run_id:)
         reset_db
         putc "."
       end
@@ -45,7 +36,7 @@ module Tachymeter
 
     private
 
-    attr_reader :timeout, :dropoff, :full_run, :run_id, :runs, :init_forks
+    attr_reader :timeout, :full_run, :run_id, :runs, :init_forks
 
     def create_db
       ActiveRecord::Tasks::DatabaseTasks.create_all
